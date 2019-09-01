@@ -6,6 +6,12 @@ export class Mouse {
     window.addEventListener('mousemove', (event) => {
       this.latest = event;
     });
+    window.addEventListener('mousedown', (event) => {
+      this.latest = event;
+    });
+    window.addEventListener('mouseup', (event) => {
+      this.latest = event;
+    });
   }
 }
 
