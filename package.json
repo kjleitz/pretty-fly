@@ -1,0 +1,27 @@
+{
+  "name": "pretty-fly",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack && node compile_html",
+    "serve": "http-server -c0",
+    "serve:watch": "webpack --watch | sed ''/^/s//`printf \"\\033[35m[webpack]\\033[0m\"`' '/'' & http-server -c0 | sed ''/^/s//`printf \"\\033[32m[server]\\033[0m\"`' '/''"
+  },
+  "dependencies": {
+    "underscore": "^1.9.1"
+  },
+  "devDependencies": {
+    "@types/underscore": "^1.9.2",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "http-server": "^0.11.1",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.6.2",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
+  }
+}
