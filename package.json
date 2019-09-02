@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack && node compile_html",
-    "serve": "http-server -c0",
-    "serve:watch": "webpack --watch | sed ''/^/s//`printf \"\\033[35m[webpack]\\033[0m\"`' '/'' & http-server -c0 | sed ''/^/s//`printf \"\\033[32m[server]\\033[0m\"`' '/''"
+    "serve": "yarn build && http-server -c0",
+    "serve:watch": "yarn build && webpack --watch | sed ''/^/s//`printf \"\\033[35m[webpack]\\033[0m\"`' '/'' & http-server -c0 | sed ''/^/s//`printf \"\\033[32m[server]\\033[0m\"`' '/''"
   },
   "dependencies": {
     "underscore": "^1.9.1"
