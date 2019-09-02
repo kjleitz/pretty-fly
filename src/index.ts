@@ -18,10 +18,26 @@ const masses = range(10).map(() => {
   });
 });
 
+const stars = range(100).map(() => {
+  const size = rand(1, 5);
+  return [
+    rand(0, window.innerWidth),
+    rand(0, window.innerHeight),
+    size,
+    size,
+  ] as const;
+});
+
 gameLoop(ctx, () => {
+  stars.forEach((rectOptions, index) => {
+    const opacity = ((index % 10) + 1) / 10;
+    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+    ctx.fillRect(...rectOptions);
+  });
+
   masses.forEach((mass) => {
     if (player.isHitting(mass)) {
-      ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
     } else {
       ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
     }
@@ -29,13 +45,24 @@ gameLoop(ctx, () => {
     ctx.fillRect(mass.x, mass.y, mass.width, mass.height);
   });
 
-  ctx.fillStyle = 'rgba(0, 100, 0, 1)';
+  ctx.fillStyle = 'rgba(0, 150, 0, 1)';
   ctx.fillRect(player.x, player.y, player.width, player.height);
+
+  const facemaskColor = 'rgba(220, 220, 255, 1)';
+  const facemaskWidth = player.width / 2;
+  const facemaskHeight = player.height / 5;
+  const facemaskOffsetY = 3;
+  ctx.fillStyle = facemaskColor;
+  switch (player.burnerXSide) {
+    case 'left': ctx.fillRect(player.x + (player.width - facemaskWidth), player.y + facemaskOffsetY, facemaskWidth, facemaskHeight); break;
+    case 'right': ctx.fillRect(player.x, player.y + facemaskOffsetY, facemaskWidth, facemaskHeight); break;
+    default: ctx.fillRect(player.x + ((player.width - facemaskWidth) / 2), player.y + facemaskOffsetY, facemaskWidth, facemaskHeight); break;
+  }
 
   const burnerColor = `rgba(255, 100, 0, ${rand(0.5, 0.75)})`;
   const burnerLengthX = rand(0.25, 0.4) * player.width;
   const burnerLengthY = rand(0.4, 0.6) * player.height;
-  const burnerAcross = (width: number): number => 0.8 * width;
+  const burnerAcross = (width: number): number => 0.6 * width;
   const burnerAcrossOffset = (width: number): number => (width - burnerAcross(width)) / 2;
 
   ctx.fillStyle = burnerColor;

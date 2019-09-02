@@ -1,5 +1,5 @@
-import { GRAVITY_X, GRAVITY_Y, FRICTION } from "./universe";
-import { dampen } from "./utilities";
+import { GRAVITY_X, GRAVITY_Y, FRICTION, NORMAL_DRAG } from "./universe";
+import { dampen, bound } from "./utilities";
 
 const updateDimension = (
   position: number,
@@ -37,6 +37,11 @@ export default class Mass {
     Object.assign(this, options);
   }
 
+  get dragCoefficient(): number {
+    const surfaceArea = (2 * this.width) + (2 * this.height);
+    return (surfaceArea / this.mass) / NORMAL_DRAG;
+  }
+
   get ax(): number { return GRAVITY_X; }
   get ay(): number { return GRAVITY_Y; }
 
@@ -45,16 +50,20 @@ export default class Mass {
   get isAgainstLeftWall(): boolean { return this.x === 0; }
   get isAgainstRightWall(): boolean { return this.x === window.innerWidth - this.width; }
 
+  get terminalVelocity(): number {
+    return 20; // TODO: should be based on drag
+  }
+
   update(): void {
     const newXDimension = updateDimension(this.x, this.dx, this.ax, this.width, window.innerWidth - this.width);
     const xFriction = this.isAgainstTopWall || this.isAgainstBottomWall ? FRICTION : 0;
     this.x = newXDimension.position;
-    this.dx = dampen(newXDimension.velocity, xFriction);
+    this.dx = bound(dampen(newXDimension.velocity, xFriction), -1 * this.terminalVelocity, this.terminalVelocity);
 
     const newYDimension = updateDimension(this.y, this.dy, this.ay, this.height, window.innerHeight - this.height);
     const yFriction = this.isAgainstLeftWall || this.isAgainstRightWall ? FRICTION : 0;
     this.y = newYDimension.position;
-    this.dy = dampen(newYDimension.velocity, yFriction);
+    this.dy = bound(dampen(newYDimension.velocity, yFriction), -1 * this.terminalVelocity, this.terminalVelocity);
   }
 
   isHitting(mass: Mass): boolean {
