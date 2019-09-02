@@ -5,7 +5,7 @@ export default class Player extends Mass {
   public width = 15;
   public height = 25;
   public jetpackForceX = 0.4; // (kg * px) / fr^2
-  public jetpackForceY = 1.2; // (kg * px) / fr^2
+  public jetpackForceY = 1.3; // (kg * px) / fr^2
 
   get burning(): boolean {
     return mouse.latest.buttons === 1;

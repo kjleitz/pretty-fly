@@ -1,4 +1,5 @@
-import { GRAVITY_X, GRAVITY_Y } from "./universe";
+import { GRAVITY_X, GRAVITY_Y, FRICTION } from "./universe";
+import { dampen } from "./utilities";
 
 const updateDimension = (
   position: number,
@@ -39,14 +40,21 @@ export default class Mass {
   get ax(): number { return GRAVITY_X; }
   get ay(): number { return GRAVITY_Y; }
 
+  get isAgainstTopWall(): boolean { return this.y === 0; }
+  get isAgainstBottomWall(): boolean { return this.y === window.innerHeight - this.height; }
+  get isAgainstLeftWall(): boolean { return this.x === 0; }
+  get isAgainstRightWall(): boolean { return this.x === window.innerWidth - this.width; }
+
   update(): void {
     const newXDimension = updateDimension(this.x, this.dx, this.ax, this.width, window.innerWidth - this.width);
+    const xFriction = this.isAgainstTopWall || this.isAgainstBottomWall ? FRICTION : 0;
     this.x = newXDimension.position;
-    this.dx = newXDimension.velocity;
+    this.dx = dampen(newXDimension.velocity, xFriction);
 
     const newYDimension = updateDimension(this.y, this.dy, this.ay, this.height, window.innerHeight - this.height);
+    const yFriction = this.isAgainstLeftWall || this.isAgainstRightWall ? FRICTION : 0;
     this.y = newYDimension.position;
-    this.dy = newYDimension.velocity;
+    this.dy = dampen(newYDimension.velocity, yFriction);
   }
 
   isHitting(mass: Mass): boolean {
