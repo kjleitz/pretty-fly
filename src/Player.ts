@@ -9,13 +9,13 @@ export default class Player extends Mass {
   public jetpackForceY = 1.3; // (kg * px) / fr^2
 
   get burning(): boolean {
-    return mouse.latest.buttons === 1;
+    return mouse.pressed;
   }
 
   get jetpackAccelerationX(): number {
     if (!this.burning) return 0;
 
-    const mouseDistance = mouse.latest.x - this.x;
+    const mouseDistance = mouse.x - this.x;
     const leftMargin = -1 * this.width;
     const rightMargin = 2 * this.width;
     if (between(mouseDistance, leftMargin, rightMargin)) return 0;
@@ -27,7 +27,7 @@ export default class Player extends Mass {
   get jetpackAccelerationY(): number {
     if (!this.burning) return 0;
 
-    const mouseDistance = mouse.latest.y - this.y;
+    const mouseDistance = mouse.y - this.y;
     const topMargin = 0;
     const bottomMargin = this.height;
     if (mouseDistance >= 0 || between(mouseDistance, topMargin, bottomMargin)) return 0;
