@@ -78,6 +78,7 @@
     "valid-typeof": 0,
     "max-len": 1,
     "arrow-body-style": 1,
+    "arrow-parens": [2, "as-needed", { "requireForBlockBody": true }],
     "lines-between-class-members": 0,
     "object-curly-newline": 1,
     "prefer-destructuring": [

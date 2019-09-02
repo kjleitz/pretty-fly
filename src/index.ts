@@ -2,35 +2,70 @@
 
 import { ctx } from './canvas';
 import onNewFrame from './onNewFrame';
+import Mass from './Mass';
 import Player from './Player';
+import { range, rand } from './utilities';
 
 const player = new Player();
 
-onNewFrame(ctx, () => {
-  ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-  ctx.fillRect(200, 200, 50, 50);
-  ctx.fillRect(275, 125, 50, 50);
-  ctx.fillRect(100, 250, 50, 50);
-  ctx.fillRect(300, 300, 50, 50);
-  ctx.fillRect(150, 300, 50, 50);
-  ctx.fillRect(250, 100, 50, 50);
+const masses = range(10).map(() => {
+  return new Mass({
+    mass: rand(0.5, 5),
+    x: rand(0, window.innerWidth),
+    y: rand(0, window.innerHeight),
+    width: rand(50, 150),
+    height: rand(50, 150),
+  });
+});
 
-  // const color = (new Date().getTime() % 4096).toString(16);
-  // ctx.fillStyle = `#${color.padStart(6 - color.length, '0')}${color}`;
-  // ctx.globalAlpha = 0.9;
-  // ctx.fillRect(mouse.latest.x - 25, mouse.latest.y - 25, 50, 50);
+onNewFrame(ctx, () => {
+  masses.forEach((mass) => {
+    if (player.isHitting(mass)) {
+      ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+    } else {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+    }
+
+    ctx.fillRect(mass.x, mass.y, mass.width, mass.height);
+  });
+
   ctx.fillStyle = 'rgba(0, 100, 0, 1)';
   ctx.fillRect(player.x, player.y, player.width, player.height);
 
-  ctx.fillStyle = 'rgba(255, 100, 0, 0.5)';
-  switch (player.burnerXDirection) {
-    case 'left': ctx.fillRect(player.x - (player.width / 2), player.y, player.width / 2, player.height); break;
-    case 'right': ctx.fillRect(player.x + player.width, player.y, player.width / 2, player.height); break;
+  const burnerColor = `rgba(255, 100, 0, ${rand(0.5, 0.75)})`;
+  const burnerLength = rand(0.5, 0.6) * player.height;
+  const burnerAcross = (width: number): number => 0.8 * width;
+  const burnerAcrossOffset = (width: number): number => (width - burnerAcross(width)) / 2;
+
+  ctx.fillStyle = burnerColor;
+  switch (player.burnerXSide) {
+    case 'left': ctx.fillRect(
+      player.x - burnerLength, // positioned on the left side of the player
+      player.y + burnerAcrossOffset(player.height), // centered on the Y axis
+      burnerLength, // long tail oriented along the X axis
+      burnerAcross(player.height), // cross-section oriented along the Y axis
+    ); break;
+    case 'right': ctx.fillRect(
+      player.x + player.width, // positioned on the right side of the player
+      player.y + burnerAcrossOffset(player.height), // centered on the Y axis
+      burnerLength, // long tail oriented along the X axis
+      burnerAcross(player.height), // cross-section oriented along the Y axis
+    ); break;
     default: break;
   }
-  switch (player.burnerYDirection) {
-    case 'down': ctx.fillRect(player.x, player.y - (player.height / 2), player.width, player.height / 2); break;
-    case 'up': ctx.fillRect(player.x, player.y + player.height, player.width, player.height / 2); break;
+  switch (player.burnerYSide) {
+    case 'bottom': ctx.fillRect(
+      player.x + burnerAcrossOffset(player.width), // centered on the X axis
+      player.y + player.height, // positioned on the bottom of the player
+      burnerAcross(player.width), // cross-section oriented along the X axis
+      burnerLength, // long tail oriented along the Y axis
+    ); break;
+    case 'top': ctx.fillRect(
+      player.x + burnerAcrossOffset(player.width), // centered on the X axis
+      player.y - burnerLength, // positioned on the top of the player
+      burnerAcross(player.width), // cross-section oriented along the X axis
+      burnerLength, // long tail oriented along the Y axis
+    ); break;
     default: break;
   }
 
