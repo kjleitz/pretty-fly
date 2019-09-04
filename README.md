@@ -16,4 +16,4 @@ yarn serve # or yarn serve:watch if you want changes to appear on refresh
 
 ## play
 
-click the screen above the player to activate his jetpack
+click (and hold) the screen above the player to activate his jetpack

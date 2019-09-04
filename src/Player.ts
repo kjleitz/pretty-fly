@@ -12,7 +12,7 @@ export default class Player extends Mass {
     return mouse.pressed;
   }
 
-  get jetpackAccelerationX(): number {
+  get axJetpack(): number {
     if (!this.burning) return 0;
 
     const mouseDistance = mouse.x - this.x;
@@ -24,7 +24,7 @@ export default class Player extends Mass {
     return mouseDistance > 0 ? jetpackAcceleration : -1 * jetpackAcceleration;
   }
 
-  get jetpackAccelerationY(): number {
+  get ayJetpack(): number {
     if (!this.burning) return 0;
 
     const mouseDistance = mouse.y - this.y;
@@ -37,20 +37,20 @@ export default class Player extends Mass {
   }
 
   get ax(): number {
-    return super.ax + this.jetpackAccelerationX;
+    return super.ax + this.axJetpack;
   }
 
   get ay(): number {
-    return super.ay + this.jetpackAccelerationY;
+    return super.ay + this.ayJetpack;
   }
 
   get burnerXSide(): 'left'|'none'|'right' {
-    if (this.jetpackAccelerationX === 0) return 'none';
-    return this.jetpackAccelerationX > 0 ? 'left' : 'right';
+    if (this.axJetpack === 0) return 'none';
+    return this.axJetpack > 0 ? 'left' : 'right';
   }
 
   get burnerYSide(): 'bottom'|'none'|'top' {
-    if (this.jetpackAccelerationY === 0) return 'none';
-    return this.jetpackAccelerationY > 0 ? 'top' : 'bottom';
+    if (this.ayJetpack === 0) return 'none';
+    return this.ayJetpack > 0 ? 'top' : 'bottom';
   }
 }

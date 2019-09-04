@@ -5,6 +5,7 @@ import gameLoop from './gameLoop';
 import Mass from './Mass';
 import Player from './Player';
 import { range, rand } from './utilities';
+import universe from './universe';
 
 const player = new Player();
 
@@ -15,6 +16,7 @@ const masses = range(10).map(() => {
     y: rand(0, window.innerHeight),
     width: rand(50, 150),
     height: rand(50, 150),
+    stationary: true,
   });
 });
 
