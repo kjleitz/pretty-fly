@@ -77,17 +77,16 @@ export default class Mass {
     this.dy = bound(dyWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
 
     const overlap = universe.overlap(this);
-    if (overlap.bottom > 0) {
+    if (this.dy > 0 && overlap.bottom > 0) {
       this.y -= overlap.bottom;
       this.dy = 0;
-    } else if (overlap.top > 0) {
+    } else if (this.dy < 0 && overlap.top > 0) {
       this.y += overlap.top;
       this.dy = 0;
-    }
-    if (overlap.right > 0) {
+    } else if (this.dx > 0 && overlap.right > 0) {
       this.x -= overlap.right;
       this.dx = 0;
-    } else if (overlap.left > 0) {
+    } else if (this.dx < 0 && overlap.left > 0) {
       this.x += overlap.left;
       this.dx = 0;
     }
