@@ -64,19 +64,21 @@ export default class Mass {
 
   update(): void {
     const newXDimension = updateDimension(this.x, this.dx, this.ax, this.width, window.innerWidth - this.width);
-    const xFriction = this.isAgainstTopWall || this.isAgainstBottomWall ? FRICTION : 0;
-    const dxWithFriction = dampen(newXDimension.velocity, xFriction);
-
     const newYDimension = updateDimension(this.y, this.dy, this.ay, this.height, window.innerHeight - this.height);
-    const yFriction = this.isAgainstLeftWall || this.isAgainstRightWall ? FRICTION : 0;
-    const dyWithFriction = dampen(newYDimension.velocity, yFriction);
 
     this.x = newXDimension.position;
-    this.dx = bound(dxWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
     this.y = newYDimension.position;
-    this.dy = bound(dyWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
 
     const overlap = universe.overlap(this);
+
+    const xFriction = this.isAgainstTopWall || this.isAgainstBottomWall || overlap.top || overlap.bottom ? FRICTION : 0;
+    const yFriction = this.isAgainstLeftWall || this.isAgainstRightWall || overlap.left || overlap.right ? FRICTION : 0;
+    const dxWithFriction = dampen(newXDimension.velocity, xFriction);
+    const dyWithFriction = dampen(newYDimension.velocity, yFriction);
+
+    this.dx = bound(dxWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
+    this.dy = bound(dyWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
+
     if (this.dy > 0 && overlap.bottom > 0) {
       this.y -= overlap.bottom;
       this.dy = 0;
