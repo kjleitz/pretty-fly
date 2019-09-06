@@ -80,16 +80,16 @@ export default class Mass {
     this.dy = bound(dyWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
 
     if (this.dy > 0 && overlap.bottom > 0) {
-      this.y -= overlap.bottom;
+      this.y -= overlap.bottom - 1;
       this.dy = 0;
     } else if (this.dy < 0 && overlap.top > 0) {
-      this.y += overlap.top;
+      this.y += overlap.top + 1;
       this.dy = 0;
     } else if (this.dx > 0 && overlap.right > 0) {
-      this.x -= overlap.right;
+      this.x -= overlap.right - 1;
       this.dx = 0;
     } else if (this.dx < 0 && overlap.left > 0) {
-      this.x += overlap.left;
+      this.x += overlap.left + 1;
       this.dx = 0;
     }
   }
