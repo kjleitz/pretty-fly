@@ -33,7 +33,7 @@ export default class Mass {
   public width = 25; // px
   public height = 25; // px
   public stationary = false;
-  private darkMatter = false;
+  public darkMatter = false;
 
   constructor(options?: Partial<Mass>) {
     Object.assign(this, options);
@@ -63,53 +63,52 @@ export default class Mass {
   get left(): number { return this.x; }
 
   update(): void {
-    const newXDimension = updateDimension(this.x, this.dx, this.ax, this.width, window.innerWidth - this.width);
-    const newYDimension = updateDimension(this.y, this.dy, this.ay, this.height, window.innerHeight - this.height);
+    const newXData = updateDimension(this.x, this.dx, this.ax, this.width, window.innerWidth - this.width);
+    const newYData = updateDimension(this.y, this.dy, this.ay, this.height, window.innerHeight - this.height);
 
-    this.x = newXDimension.position;
-    this.y = newYDimension.position;
+    let newX = newXData.position;
+    let newY = newYData.position;
+    let newDx = newXData.velocity;
+    let newDy = newYData.velocity;
 
-    const overlap = universe.overlap(this);
+    const overlap = universe.overlapForMove(this, { x: newX, y: newY });
 
-    const xFriction = this.isAgainstTopWall || this.isAgainstBottomWall || overlap.top || overlap.bottom ? FRICTION : 0;
-    const yFriction = this.isAgainstLeftWall || this.isAgainstRightWall || overlap.left || overlap.right ? FRICTION : 0;
-    const dxWithFriction = dampen(newXDimension.velocity, xFriction);
-    const dyWithFriction = dampen(newYDimension.velocity, yFriction);
-
-    this.dx = bound(dxWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
-    this.dy = bound(dyWithFriction, -1 * this.terminalVelocity, this.terminalVelocity);
-
-    if (this.dy > 0 && overlap.bottom > 0) {
-      this.y -= overlap.bottom - 1;
-      this.dy = 0;
-    } else if (this.dy < 0 && overlap.top > 0) {
-      this.y += overlap.top + 1;
-      this.dy = 0;
-    } else if (this.dx > 0 && overlap.right > 0) {
-      this.x -= overlap.right - 1;
-      this.dx = 0;
-    } else if (this.dx < 0 && overlap.left > 0) {
-      this.x += overlap.left + 1;
-      this.dx = 0;
+    if (overlap.right > 0) {
+      newX -= overlap.right;
+      newDx = 0;
+    } else if (overlap.left > 0) {
+      newX += overlap.left;
+      newDx = 0;
     }
+
+    if (overlap.bottom > 0) {
+      newY -= overlap.bottom;
+      newDy = 0;
+    } else if (overlap.top > 0) {
+      newY += overlap.top;
+      newDy = 0;
+    }
+
+    this.x = newX;
+    this.y = newY;
+
+    if (this.isAgainstTopWall || this.isAgainstBottomWall || overlap.top || overlap.bottom) {
+      newDx = dampen(newDx, FRICTION);
+    }
+    if (this.isAgainstLeftWall || this.isAgainstRightWall || overlap.left || overlap.right) {
+      newDy = dampen(newDy, FRICTION);
+    }
+
+    this.dx = bound(newDx, -1 * this.terminalVelocity, this.terminalVelocity);
+    this.dy = bound(newDy, -1 * this.terminalVelocity, this.terminalVelocity);
   }
 
   isHitting(mass: Mass): boolean {
-    const massLeft = mass.x;
-    const massRight = mass.x + mass.width;
-    const massTop = mass.y;
-    const massBottom = mass.y + mass.height;
-
-    const thisLeft = this.x;
-    const thisRight = this.x + this.width;
-    const thisTop = this.y;
-    const thisBottom = this.y + this.height;
-
     return (
-      thisRight >= massLeft
-      && thisLeft <= massRight
-      && thisBottom >= massTop
-      && thisTop <= massBottom
+      this.right >= mass.left
+      && this.left <= mass.right
+      && this.bottom >= mass.top
+      && this.top <= mass.bottom
     );
   }
 }

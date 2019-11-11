@@ -41,3 +41,5 @@ export const between = (num: number, min: number, max: number, inclusive = true)
   const [realMin, realMax] = min < max ? [min, max] : [max, min];
   return inclusive ? (num >= realMin && num <= realMax) : (num > realMin && num < realMax);
 };
+
+export const difference = (n: number, m: number): number => Math.abs(n - m);
