@@ -7,22 +7,27 @@ export const AIR_RESISTANCE = 0.25; // TODO
 export const FRICTION = 0.25; // TODO: this should be dependent on mass
 export const NORMAL_DRAG = 100; // surface area in pixels, per kilogram
 
-interface Overlap {
-  top: number;
-  left: number;
-  right: number;
-  bottom: number;
-}
-
 interface Point {
   x: number;
   y: number;
 }
 
+interface Overlap {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+interface Overlaps {
+  solid: Overlap;
+  ephemeral: Overlap;
+}
+
 class Universe {
   public masses = [] as Mass[];
 
-  overlapForMove(subject: Mass, toPosition: Point): Overlap {
+  overlapForMove(subject: Mass, toPosition: Point): Overlaps {
     const movedSubject = new Mass({
       ...subject,
       ...toPosition,
@@ -39,12 +44,13 @@ class Universe {
     };
 
     /* eslint-disable no-param-reassign */
-    return this.masses.reduce((overlap, obstacle) => {
-      if (obstacle === subject) return overlap;
+    return this.masses.reduce((overlaps, obstacle) => {
+      if (obstacle === subject) return overlaps;
 
       const hittingObstacle = movedSubject.isHitting(obstacle);
-      if (!hittingObstacle) return overlap;
+      if (!hittingObstacle) return overlaps;
 
+      const overlap = obstacle.solid ? overlaps.solid : overlaps.ephemeral;
       if (moving.up && between(obstacle.bottom, subject.top, movedSubject.top)) {
         const distance = difference(obstacle.bottom, movedSubject.top);
         if (overlap.top < distance) overlap.top = distance;
@@ -65,12 +71,20 @@ class Universe {
         if (overlap.right < distance) overlap.right = distance;
       }
 
-      return overlap;
+      return overlaps;
     }, {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
+      solid: {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+      },
+      ephemeral: {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+      },
     });
     /* eslint-enable no-param-reassign */
   }

@@ -5,26 +5,46 @@ import gameLoop from './gameLoop';
 import Mass from './Mass';
 import Player from './Player';
 import { range, rand } from './utilities';
-import universe from './universe';
+
+const EPHEMERAL_DISAPPEARANCE_TIME = 200;
+const MAX_X = window.innerWidth;
+const MAX_Y = window.innerHeight;
 
 const player = new Player();
 
-const masses = range(10).map(() => {
+const solidMasses = range(10).map(() => {
   return new Mass({
-    mass: rand(0.5, 5),
-    x: rand(0, window.innerWidth),
-    y: rand(0, window.innerHeight),
+    x: rand(0, MAX_X),
+    y: rand(0, MAX_Y),
     width: rand(50, 150),
     height: rand(50, 150),
     stationary: true,
   });
 });
 
+const collectibles = range(10).map(() => {
+  return new Mass({
+    mass: rand(0.5, 5),
+    x: rand(0, MAX_X),
+    y: rand(0, MAX_Y),
+    width: 25,
+    height: 25,
+    solid: false,
+    stationary: Math.random() > 0.5,
+    collectOnTouch: true,
+  });
+});
+
+const masses = [...solidMasses, ...collectibles];
+const freeMasses = [player, ...masses.filter(mass => !mass.stationary)];
+let points = 0;
+const maxPoints = collectibles.length;
+
 const stars = range(100).map(() => {
   const size = rand(1, 5);
   return [
-    rand(0, window.innerWidth),
-    rand(0, window.innerHeight),
+    rand(0, MAX_X),
+    rand(0, MAX_Y),
     size,
     size,
   ] as const;
@@ -37,14 +57,30 @@ gameLoop(ctx, () => {
     ctx.fillRect(...rectOptions);
   });
 
-  masses.forEach((mass) => {
-    if (player.isHitting(mass)) {
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+  masses.forEach((mass, index) => {
+    const hittingMass = player.isHitting(mass);
+    let stillPresent = true;
+
+    if (mass.solid) {
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+    } else if (hittingMass && !mass.touchedAt) {
+      ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
+      mass.touchedAt = new Date().getTime(); // eslint-disable-line no-param-reassign
+    } else if (mass.collectOnTouch && mass.touchedAt) {
+      const msSinceTouch = new Date().getTime() - mass.touchedAt;
+      if (msSinceTouch > EPHEMERAL_DISAPPEARANCE_TIME) {
+        masses.splice(index, 1);
+        stillPresent = false;
+        points += 1;
+      } else {
+        const rgValue = Math.ceil((msSinceTouch / EPHEMERAL_DISAPPEARANCE_TIME) * 255);
+        ctx.fillStyle = `rgba(${rgValue}, ${rgValue}, 255, 0.8)`;
+      }
     } else {
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+      ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
     }
 
-    ctx.fillRect(mass.x, mass.y, mass.width, mass.height);
+    if (stillPresent) ctx.fillRect(mass.x, mass.y, mass.width, mass.height);
   });
 
   ctx.fillStyle = 'rgba(0, 150, 0, 1)';
@@ -99,5 +135,10 @@ gameLoop(ctx, () => {
     default: break;
   }
 
-  player.update();
+  ctx.font = "30px Courier";
+  ctx.fillStyle = '#FFF';
+  const scoreText = `${points}/${maxPoints}${points === maxPoints ? ' aww yee' : ''}`;
+  ctx.fillText(scoreText, 50, 50);
+
+  freeMasses.forEach(mass => mass.update());
 });

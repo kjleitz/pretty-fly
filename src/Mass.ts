@@ -32,8 +32,11 @@ export default class Mass {
   public dy = 0; // px/fr
   public width = 25; // px
   public height = 25; // px
-  public stationary = false;
-  public darkMatter = false;
+  public stationary = false; // doesn't move
+  public darkMatter = false; // doesn't interact
+  public solid = true; // can't pass through it
+  public collectOnTouch = false;
+  public touchedAt = null as null|number;
 
   constructor(options?: Partial<Mass>) {
     Object.assign(this, options);
@@ -71,31 +74,32 @@ export default class Mass {
     let newDx = newXData.velocity;
     let newDy = newYData.velocity;
 
-    const overlap = universe.overlapForMove(this, { x: newX, y: newY });
+    const overlaps = universe.overlapForMove(this, { x: newX, y: newY });
+    const solidOverlap = overlaps.solid;
 
-    if (overlap.right > 0) {
-      newX -= overlap.right;
+    if (solidOverlap.right > 0) {
+      newX -= solidOverlap.right;
       newDx = 0;
-    } else if (overlap.left > 0) {
-      newX += overlap.left;
+    } else if (solidOverlap.left > 0) {
+      newX += solidOverlap.left;
       newDx = 0;
     }
 
-    if (overlap.bottom > 0) {
-      newY -= overlap.bottom;
+    if (solidOverlap.bottom > 0) {
+      newY -= solidOverlap.bottom;
       newDy = 0;
-    } else if (overlap.top > 0) {
-      newY += overlap.top;
+    } else if (solidOverlap.top > 0) {
+      newY += solidOverlap.top;
       newDy = 0;
     }
 
     this.x = newX;
     this.y = newY;
 
-    if (this.isAgainstTopWall || this.isAgainstBottomWall || overlap.top || overlap.bottom) {
+    if (this.isAgainstTopWall || this.isAgainstBottomWall || solidOverlap.top || solidOverlap.bottom) {
       newDx = dampen(newDx, FRICTION);
     }
-    if (this.isAgainstLeftWall || this.isAgainstRightWall || overlap.left || overlap.right) {
+    if (this.isAgainstLeftWall || this.isAgainstRightWall || solidOverlap.left || solidOverlap.right) {
       newDy = dampen(newDy, FRICTION);
     }
 
