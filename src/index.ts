@@ -5,6 +5,7 @@ import gameLoop from './gameLoop';
 import Mass from './Mass';
 import Player from './Player';
 import { range, rand } from './utilities';
+import Star from './Star';
 
 const EPHEMERAL_DISAPPEARANCE_TIME = 200;
 const MAX_X = window.innerWidth;
@@ -40,21 +41,46 @@ const freeMasses = [player, ...masses.filter(mass => !mass.stationary)];
 let points = 0;
 const maxPoints = collectibles.length;
 
-const stars = range(100).map(() => {
-  const size = rand(1, 5);
-  return [
-    rand(0, MAX_X),
-    rand(0, MAX_Y),
-    size,
-    size,
-  ] as const;
-});
+const stars = range(100, () => new Star(rand(0, MAX_X), rand(0, MAX_Y)));
 
-gameLoop(ctx, () => {
-  stars.forEach((rectOptions, index) => {
-    const opacity = ((index % 10) + 1) / 10;
-    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-    ctx.fillRect(...rectOptions);
+const shootingStars = [] as Star[];
+setInterval(() => {
+  const [x, y] = Math.random() > 0.5 ? [rand(250, MAX_X), 0] : [MAX_X, rand(0, MAX_Y - 250)];
+  const vector = [-10, 10] as const;
+  shootingStars.push(new Star(x, y, { size: 5, brightness: 1, vector }));
+}, 2000);
+
+gameLoop(ctx, (loopCount) => {
+  // stars.forEach(({ x, y, size, brightness }, index) => {
+  //   const twinkle = brightness - Math.random();
+  //   ctx.fillStyle = `rgba(255, 255, 255, ${(loopCount + index) % 20 === 0 ? twinkle : brightness})`;
+  //   ctx.fillRect(x, y, size, size);
+  // });
+  stars.forEach((star, index) => {
+    const { x, y, size, brightness, vector } = star;
+    const twinkle = brightness - Math.random();
+    ctx.fillStyle = `rgba(255, 255, 255, ${(loopCount + index) % 20 === 0 ? twinkle : brightness})`;
+    ctx.fillRect(x, y, size, size);
+    // if (loopCount % 10 === 0) {
+    star.x += vector[0]; // eslint-disable-line no-param-reassign
+    star.y += vector[1]; // eslint-disable-line no-param-reassign
+    // }
+    if (star.x < 0 || star.x > MAX_X || star.y < 0 || star.y > MAX_Y) {
+      const [newX, newY] = Math.random() > 0.5 ? [rand(0, MAX_X), 0] : [MAX_X, rand(0, MAX_Y)];
+      star.x = newX; // eslint-disable-line no-param-reassign
+      star.y = newY; // eslint-disable-line no-param-reassign
+    }
+  });
+
+  shootingStars.forEach((star, index) => {
+    const { x, y, size, brightness, vector } = star;
+    ctx.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+    ctx.fillRect(x, y, size, size);
+    star.x += vector[0]; // eslint-disable-line no-param-reassign
+    star.y += vector[1]; // eslint-disable-line no-param-reassign
+    if (star.x < 0 || star.x > MAX_X || star.y < 0 || star.y > MAX_Y) {
+      shootingStars.splice(index, 1);
+    }
   });
 
   masses.forEach((mass, index) => {

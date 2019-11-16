@@ -74,7 +74,7 @@ export default class Mass {
     let newDx = newXData.velocity;
     let newDy = newYData.velocity;
 
-    const overlaps = universe.overlapForMove(this, { x: newX, y: newY });
+    const overlaps = universe.collisionsForMove(this, { x: newX, y: newY });
     const solidOverlap = overlaps.solid;
 
     if (solidOverlap.right > 0) {

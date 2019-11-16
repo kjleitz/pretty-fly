@@ -4,16 +4,35 @@ export const rand = (min: number, max: number): number => {
   return realMin + (Math.random() * diff);
 };
 
-export const range = (min: number, max?: number): number[] => {
-  if (!max) {
-    max = min; // eslint-disable-line no-param-reassign
-    min = 0; // eslint-disable-line no-param-reassign
-  }
+// export const range = (min: number, max?: number): number[] => {
+//   if (!max) {
+//     max = min; // eslint-disable-line no-param-reassign
+//     min = 0; // eslint-disable-line no-param-reassign
+//   }
+//   const [realMin, realMax] = min < max ? [min, max] : [max, min];
+//   const diff = realMax - realMin;
+//   const baseArray = [...Array(diff).keys()].map(n => n + realMin);
+//   return max >= min ? baseArray : [realMax, ...baseArray.slice(1).reverse()];
+// };
+
+export function range<T>(min: number, ...maxAndOrMapper: []): number[];
+export function range<T>(min: number, ...maxAndOrMapper: [number]): number[];
+export function range<T>(min: number, ...maxAndOrMapper: [(n: number) => T]): T[];
+export function range<T>(min: number, ...maxAndOrMapper: [number, (n: number) => T]): T[];
+export function range<T>(min: number, ...maxAndOrMapper: []|[number|((n: number) => T)]|[number, (n: number) => T]): (number|T)[] {
+  const max = typeof maxAndOrMapper[0] === 'number' ? maxAndOrMapper[0] : 0;
+  const mapper = typeof maxAndOrMapper[0] === 'function' ? maxAndOrMapper[0] : maxAndOrMapper[1];
   const [realMin, realMax] = min < max ? [min, max] : [max, min];
   const diff = realMax - realMin;
-  const baseArray = [...Array(diff).keys()].map(n => n + realMin);
-  return max >= min ? baseArray : [realMax, ...baseArray.slice(1).reverse()];
-};
+  return [...Array(diff).keys()].map(n => (mapper ? mapper(n + realMin) : n + realMin));
+}
+
+const a = range(10);
+const b = range(0, 10);
+const c = range(0, n => n.toString());
+const d = range(0, 10, n => n.toString());
+
+(window as any).range = range;
 
 export const dampen = (num: number, by: number, center = 0): number => {
   // number is already at the center

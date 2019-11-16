@@ -27,7 +27,7 @@ interface Overlaps {
 class Universe {
   public masses = [] as Mass[];
 
-  overlapForMove(subject: Mass, toPosition: Point): Overlaps {
+  collisionsForMove(subject: Mass, toPosition: Point): Overlaps {
     const movedSubject = new Mass({
       ...subject,
       ...toPosition,
