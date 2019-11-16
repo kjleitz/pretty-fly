@@ -47,7 +47,7 @@ const shootingStars = [] as Star[];
 setInterval(() => {
   const [x, y] = Math.random() > 0.5 ? [rand(250, MAX_X), 0] : [MAX_X, rand(0, MAX_Y - 250)];
   const vector = [-10, 10] as const;
-  shootingStars.push(new Star(x, y, { size: 5, brightness: 1, vector }));
+  shootingStars.push(new Star(x, y, { brightness: 1, vector }));
 }, 2000);
 
 gameLoop(ctx, (loopCount) => {
