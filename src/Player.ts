@@ -1,15 +1,22 @@
 import Mass from "./Mass";
 import mouse from "./mouse";
-import { between } from "./utilities";
+import { between, bound } from "./utilities";
 
 export default class Player extends Mass {
   public width = 15;
   public height = 20;
   public jetpackForceX = 0.4; // (kg * px) / fr^2
   public jetpackForceY = 1.3; // (kg * px) / fr^2
+  public MAX_FUEL = 100;
+  public MIN_FUEL = 0;
+  public MAX_FUEL_RECHARGE = 25;
+  public fuelRechargeRate = 0.1;
+  public fuelRechargeDelay = 200;
+  public lastBurn = null as null|Date;
+  private _fuel = 100;
 
   get burning(): boolean {
-    return mouse.pressed;
+    return this.fuel > 0 && mouse.pressed;
   }
 
   get axJetpack(): number {
@@ -52,5 +59,27 @@ export default class Player extends Mass {
   get burnerYSide(): 'bottom'|'none'|'top' {
     if (this.ayJetpack === 0) return 'none';
     return this.ayJetpack > 0 ? 'top' : 'bottom';
+  }
+
+  set fuel(fuel: number) {
+    this._fuel = bound(fuel, this.MIN_FUEL, this.MAX_FUEL);
+  }
+
+  get fuel(): number {
+    return this._fuel;
+  }
+
+  update(): void {
+    super.update();
+    if (this.burning) {
+      this.fuel -= 0.5;
+      this.lastBurn = new Date();
+    } else if (
+      this.fuel < this.MAX_FUEL_RECHARGE
+      && this.lastBurn
+      && new Date().getTime() - this.lastBurn.getTime() > this.fuelRechargeDelay
+    ) {
+      this.fuel = bound(this.fuel + this.fuelRechargeRate, this.MIN_FUEL, this.MAX_FUEL);
+    }
   }
 }

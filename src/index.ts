@@ -31,7 +31,7 @@ const collectibles = range(10).map(() => {
     width: 25,
     height: 25,
     solid: false,
-    stationary: Math.random() > 0.5,
+    stationary: false,
     collectOnTouch: true,
   });
 });
@@ -92,6 +92,7 @@ gameLoop(ctx, (loopCount) => {
     } else if (hittingMass && !mass.touchedAt) {
       ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
       mass.touchedAt = new Date().getTime(); // eslint-disable-line no-param-reassign
+      player.fuel += 0.25 * player.MAX_FUEL;
     } else if (mass.collectOnTouch && mass.touchedAt) {
       const msSinceTouch = new Date().getTime() - mass.touchedAt;
       if (msSinceTouch > EPHEMERAL_DISAPPEARANCE_TIME) {
@@ -165,6 +166,15 @@ gameLoop(ctx, (loopCount) => {
   ctx.fillStyle = '#FFF';
   const scoreText = `${points}/${maxPoints}${points === maxPoints ? ' aww yee' : ''}`;
   ctx.fillText(scoreText, 50, 50);
+
+  const fuelBarWidth = 300;
+  const fuelRemaining = player.fuel / player.MAX_FUEL;
+  const fuelRemainingPoint = fuelBarWidth * fuelRemaining;
+  const flashing = fuelRemaining < 0.25 && loopCount % 20 > 10;
+  ctx.fillStyle = flashing ? 'rgba(255, 0, 0, 0.6)' : 'rgba(255, 0, 0, 0.3)';
+  ctx.fillRect(50 + fuelRemainingPoint, 60, fuelBarWidth - fuelRemainingPoint, 30);
+  ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+  ctx.fillRect(50, 60, fuelRemainingPoint, 30);
 
   freeMasses.forEach(mass => mass.update());
 });
