@@ -51,20 +51,19 @@ setInterval(() => {
 }, 2000);
 
 gameLoop(ctx, (loopCount) => {
-  // stars.forEach(({ x, y, size, brightness }, index) => {
-  //   const twinkle = brightness - Math.random();
-  //   ctx.fillStyle = `rgba(255, 255, 255, ${(loopCount + index) % 20 === 0 ? twinkle : brightness})`;
-  //   ctx.fillRect(x, y, size, size);
-  // });
+  // const edgeDistanceX = Math.min(player.left / window.innerWidth, (window.innerWidth - player.right) / window.innerWidth);
+  // const edgeDistanceY = Math.min(player.top / window.innerHeight, (window.innerHeight - player.bottom) / window.innerHeight);
+  // if (edgeDistanceX < 0.25 || edgeDistanceY < 0.25) {
+  //   console.log(`x: ${edgeDistanceX}, y: ${edgeDistanceY}... shift!`);
+  // }
+
   stars.forEach((star, index) => {
     const { x, y, size, brightness, vector } = star;
     const twinkle = brightness - Math.random();
     ctx.fillStyle = `rgba(255, 255, 255, ${(loopCount + index) % 20 === 0 ? twinkle : brightness})`;
     ctx.fillRect(x, y, size, size);
-    // if (loopCount % 10 === 0) {
     star.x += vector[0]; // eslint-disable-line no-param-reassign
     star.y += vector[1]; // eslint-disable-line no-param-reassign
-    // }
     if (star.x < 0 || star.x > MAX_X || star.y < 0 || star.y > MAX_Y) {
       const [newX, newY] = Math.random() > 0.5 ? [rand(0, MAX_X), 0] : [MAX_X, rand(0, MAX_Y)];
       star.x = newX; // eslint-disable-line no-param-reassign

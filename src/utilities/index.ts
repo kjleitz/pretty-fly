@@ -27,13 +27,6 @@ export function range<T>(min: number, ...maxAndOrMapper: []|[number|((n: number)
   return [...Array(diff).keys()].map(n => (mapper ? mapper(n + realMin) : n + realMin));
 }
 
-const a = range(10);
-const b = range(0, 10);
-const c = range(0, n => n.toString());
-const d = range(0, 10, n => n.toString());
-
-(window as any).range = range;
-
 export const dampen = (num: number, by: number, center = 0): number => {
   // number is already at the center
   if (num === center) return center;
